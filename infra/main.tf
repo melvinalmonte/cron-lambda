@@ -1,8 +1,27 @@
+terraform {
+  required_version = ">= 1.5.7"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.35.0"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.4.2"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+
 ############# dependencies installation and packaging #############
 
-resource "null_resource" "pip_install" {
-  triggers = {
-    shell_hash = "${sha256(file("${path.module}/../requirements.txt"))}"
+resource "terraform_data" "pip_install" {
+  triggers_replace = {
+    shell_hash = sha256(file("${path.module}/../requirements.txt"))
   }
 
   provisioner "local-exec" {
@@ -14,7 +33,7 @@ data "archive_file" "layer" {
   type        = "zip"
   source_dir  = "${path.module}/layer"
   output_path = "${path.module}/layer.zip"
-  depends_on  = [null_resource.pip_install]
+  depends_on  = [terraform_data.pip_install]
 }
 
 resource "aws_lambda_layer_version" "layer" {
