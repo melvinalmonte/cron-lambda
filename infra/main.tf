@@ -1,3 +1,5 @@
+############# dependencies installation and packaging #############
+
 resource "null_resource" "pip_install" {
   triggers = {
     shell_hash = "${sha256(file("${path.module}/../requirements.txt"))}"
@@ -28,6 +30,8 @@ data "archive_file" "code" {
   output_path = "${path.module}/code.zip"
 }
 
+############# IAM Roles and Permissioning #############
+
 resource "aws_iam_role" "iam_role" {
   name = "lambda-iam-role"
 
@@ -47,7 +51,6 @@ resource "aws_iam_role" "iam_role" {
 }
 EOF
 }
-
 
 resource "aws_iam_policy" "lambda_logs_policy" {
   name        = "lambda-logs-policy"
@@ -76,6 +79,8 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
   policy_arn = aws_iam_policy.lambda_logs_policy.arn
 }
 
+############# Lambda Resources #############
+
 resource "aws_lambda_function" "lambda" {
   function_name    = "test-lambda"
   handler          = "main.handler"
@@ -91,7 +96,7 @@ resource "aws_lambda_function" "lambda" {
   }
 }
 
-# EVENTBRIDGE
+############# EventBridge/Cloudwatch CRON #############
 
 resource "aws_cloudwatch_event_rule" "every_hour" {
   name                = "every-hour"
