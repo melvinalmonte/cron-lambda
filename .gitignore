@@ -206,3 +206,4 @@ override.tf.json
 .terraformrc
 terraform.rc
 *.zip
+.DS_Store
